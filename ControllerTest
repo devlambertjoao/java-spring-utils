@@ -1,0 +1,70 @@
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
+
+@AutoConfigureMockMvc
+public class ControllerTest {
+
+	private static final Logger logger = LoggerFactory.getLogger(ControllerTest.class);
+
+	private MockMvc mockMvc;
+
+	private static TestUtils testUtils;
+
+	@Mock
+	private Service service;
+
+	@InjectMocks
+	private Controller controller;
+
+	@BeforeAll
+	static void beforeAll() {
+		logger.info("Tests starting");
+	}
+
+	@AfterAll
+	static void afterAll() {
+		logger.info("Tests ending!");
+	}
+
+	@BeforeEach
+	void beforeEach() {
+		MockitoAnnotations.openMocks(this);
+		mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
+	}
+
+	@AfterEach
+	void afterEach() {
+		mockMvc = null;
+	}
+
+	@Test
+	@DisplayName("POST")
+	public void saveValidProductMustReturnOk() throws Exception {
+		DTO dto = new DTO();
+		Mockito.when(service.create(dto)).thenReturn(dto);
+		mockMvc.perform(MockMvcRequestBuilders.post("/controller")
+				.header("content-type", MediaType.APPLICATION_JSON_VALUE).content(new ObjectMapper().writeValueAsString(obj)))
+				.andExpect(MockMvcResultMatchers.status().isCreated());
+	}
+
+}
